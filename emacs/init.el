@@ -55,17 +55,27 @@
 ;; C-c C-t) enters copy mode, where the buffer holds still to scroll, search
 ;; and copy; RET or C-c C-t again returns to the live terminal. A long
 ;; conversation needs far more than the default 1000 lines of scrollback.
-(defun tt-vterm-scroll-back (event)
-  "Freeze this vterm buffer (copy mode) and scroll back for EVENT."
+;; (Scrolls by lines: mwheel-scroll isn't loaded in a terminal frame.)
+(defun tt-vterm-scroll-back (_event)
+  "Freeze this vterm buffer (copy mode) and scroll back."
   (interactive "e")
   (unless vterm-copy-mode (vterm-copy-mode 1))
-  (mwheel-scroll event))
+  (scroll-down 3))
+(defun tt-vterm-scroll-forward (_event)
+  "In copy mode, scroll forward."
+  (interactive "e")
+  (when vterm-copy-mode (scroll-up 3)))
 (use-package vterm
   :commands vterm
   :custom (vterm-max-scrollback 100000)
-  :bind (:map vterm-mode-map
-         ("<wheel-up>" . tt-vterm-scroll-back)
-         ("<mouse-4>" . tt-vterm-scroll-back)))
+  :bind ((:map vterm-mode-map
+          ("<wheel-up>" . tt-vterm-scroll-back)
+          ("<mouse-4>" . tt-vterm-scroll-back)
+          ("<wheel-down>" . tt-vterm-scroll-forward)
+          ("<mouse-5>" . tt-vterm-scroll-forward))
+         (:map vterm-copy-mode-map
+          ("<wheel-up>" . tt-vterm-scroll-back)
+          ("<wheel-down>" . tt-vterm-scroll-forward))))
 
 ;; M-x sessions: every Mac's Claude Code sessions (sessions.el).
 (load (expand-file-name "sessions" (file-name-directory (or load-file-name buffer-file-name))) nil t)
