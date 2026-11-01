@@ -254,11 +254,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793334100,
-        "narHash": "sha256-eqNKw/4w6xJ8NmxvvM2j4Jw/ja4RRjlrCga8zajk+AA=",
+        "lastModified": 1793496540,
+        "narHash": "sha256-MF91XnFLIrVt8bIKvJ5Hd6XdT+mQgaXf0MvQ1nim4mw=",
         "ref": "main",
-        "rev": "4c99ebe781bf8cef8ceecbd553a0f562d4e759ef",
-        "revCount": 5,
+        "rev": "b4da7a4680d7271a1ec36b676aff5ca180032267",
+        "revCount": 6,
         "type": "git",
         "url": "https://github.com/dawson-shay/tinytrader-deploy"
       },
@@ -283,11 +283,11 @@
         "tinytrader-deploy": "tinytrader-deploy"
       },
       "locked": {
-        "lastModified": 1793482307,
-        "narHash": "sha256-SbLaJRzHGMCG2GlhJnEZG5rLYjr/tyQ/F1jJfo5EsmU=",
+        "lastModified": 1793496659,
+        "narHash": "sha256-NkT1cXv/QilGFEehgBliaylyjlAN7bpd8BKN2YB5ItE=",
         "ref": "main",
-        "rev": "96af530063422d64a6c3fb6aa56d37cd44bdbded",
-        "revCount": 255,
+        "rev": "817f5f3045698816208dec122f5c353747a3267b",
+        "revCount": 256,
         "type": "git",
         "url": "https://github.com/dawson-shay/tinytrader-ops"
       },
