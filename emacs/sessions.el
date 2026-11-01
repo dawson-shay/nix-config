@@ -113,6 +113,10 @@ MACS is the list from `sessions --json'."
      (t
       (require 'vterm)
       (let ((buf (format "*session: %s/%s*" host name)))
+        ;; One whose attach has ended (the session stopped, or the
+        ;; connection dropped) is started again rather than shown dead.
+        (when (and (get-buffer buf) (not (process-live-p (get-buffer-process buf))))
+          (let ((kill-buffer-query-functions nil)) (kill-buffer buf)))
         (if (get-buffer buf)
             (pop-to-buffer-same-window buf)
           (let ((vterm-shell (sessions--command
