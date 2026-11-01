@@ -26,12 +26,6 @@
 ;; program that doesn't ask for the mouse.
 (xterm-mouse-mode 1)
 
-;; Copying in a terminal frame (M-w, or a mouse selection) reaches the Mac's
-;; clipboard: Emacs sends it to the terminal (OSC 52), which Ghostty passes on,
-;; over ssh or mosh too. Pasting from the clipboard is the terminal's own
-;; (Cmd-V in Ghostty).
-(setq xterm-extra-capabilities '(setSelection))
-
 ;; Built-in dark theme (Modus, since Emacs 28): high contrast.
 (load-theme 'modus-vivendi t)
 
