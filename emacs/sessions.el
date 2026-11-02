@@ -105,7 +105,7 @@ MACS is the list from `sessions --json'."
 (defun sessions-open ()
   "Open the background session on this line in a vterm buffer."
   (interactive)
-  (pcase-let ((`(,host ,name ,kind . ,_) (tabulated-list-get-id)))
+  (pcase-let ((`(,host ,name ,kind ,id . ,_) (tabulated-list-get-id)))
     (cond
      ((not name) (user-error "%s can't be reached" host))
      ((not (equal kind "background"))
@@ -120,7 +120,9 @@ MACS is the list from `sessions --json'."
         (if (get-buffer buf)
             (pop-to-buffer-same-window buf)
           (let ((vterm-shell (sessions--command
-                              host (format "claude attach %s" (shell-quote-argument name)))))
+                              ;; By id: a name can match several sessions (another's
+                              ;; task text), and then attach refuses.
+                              host (format "claude attach %s" (shell-quote-argument (or id name))))))
             (vterm buf))))))))
 
 (defun sessions-start (host dir prompt)
