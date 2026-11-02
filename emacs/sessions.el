@@ -63,7 +63,10 @@ MACS is the list from `sessions --json'."
           (dolist (a (alist-get 'agents m))
             (let ((name (or (alist-get 'name a) ""))
                   (kind (or (alist-get 'kind a) "")))
-              (push (list (list host name kind (alist-get 'sessionId a) (alist-get 'cwd a))
+              ;; The session ID (for --resume) and the background job's
+              ;; short ID (what `claude attach' takes).
+              (push (list (list host name kind (alist-get 'sessionId a) (alist-get 'cwd a)
+                                (alist-get 'id a))
                           (vector host name (format "%s" (or (alist-get 'status a) ""))
                                   kind
                                   (replace-regexp-in-string
@@ -105,7 +108,7 @@ MACS is the list from `sessions --json'."
 (defun sessions-open ()
   "Open the background session on this line in a vterm buffer."
   (interactive)
-  (pcase-let ((`(,host ,name ,kind ,id . ,_) (tabulated-list-get-id)))
+  (pcase-let ((`(,host ,name ,kind ,_sid ,_cwd ,job) (tabulated-list-get-id)))
     (cond
      ((not name) (user-error "%s can't be reached" host))
      ((not (equal kind "background"))
@@ -120,9 +123,10 @@ MACS is the list from `sessions --json'."
         (if (get-buffer buf)
             (pop-to-buffer-same-window buf)
           (let ((vterm-shell (sessions--command
-                              ;; By id: a name can match several sessions (another's
-                              ;; task text), and then attach refuses.
-                              host (format "claude attach %s" (shell-quote-argument (or id name))))))
+                              ;; By the job's ID: a name can match several sessions
+                              ;; (another's task text), and then attach refuses; it
+                              ;; doesn't take the session ID.
+                              host (format "claude attach %s" (shell-quote-argument (or job name))))))
             (vterm buf))))))))
 
 (defun sessions-start (host dir prompt)
@@ -145,7 +149,7 @@ MACS is the list from `sessions --json'."
 Claude Code can resume a session in the background under the same ID only
 after it has stopped in its terminal (otherwise it starts a copy)."
   (interactive)
-  (pcase-let ((`(,host ,name ,kind ,id ,cwd) (tabulated-list-get-id)))
+  (pcase-let ((`(,host ,name ,kind ,id ,cwd . ,_) (tabulated-list-get-id)))
     (cond
      ((not name) (user-error "%s can't be reached" host))
      ((equal kind "background") (user-error "%s already runs in the background: RET opens it" name))
