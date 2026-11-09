@@ -58,22 +58,4 @@
   # ~/.local/share/tinytrader/deploy; decision 0012), so ~/repos is an
   # ordinary working copy.
   tinytrader-ops.autoDeploy.enable = true;
-
-  # The Data drive (the original Databento archive, immutable) is attached
-  # here since the M2's power strip couldn't carry it; nothing on this Mac
-  # writes to it, so macOS mounts it read-only wherever it's plugged in. An
-  # fstab line by volume UUID, mount point "none" (macOS picks /Volumes/Data).
-  # /etc/fstab is Determinate Nix's (its /nix line), so this keeps that
-  # line and owns only its own.
-  system.activationScripts.postActivation.text = ''
-    uuid=CB9328B5-FACC-4AD9-8849-528DA3E6C93C
-    line="UUID=$uuid none apfs ro,nodev,nosuid # The Data drive, read-only (nix-config darwin/mini.nix)"
-    touch /etc/fstab
-    if ! grep -qxF "$line" /etc/fstab; then
-      grep -v "^UUID=$uuid " /etc/fstab > /etc/fstab.new || true
-      printf '%s\n' "$line" >> /etc/fstab.new
-      chmod 644 /etc/fstab.new
-      mv /etc/fstab.new /etc/fstab
-    fi
-  '';
 }
