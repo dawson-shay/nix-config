@@ -39,6 +39,10 @@
   # The keys allowed in (public keys only; the backup module adds the M2's).
   users.users.dawsonshay.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKAL6Lsp876QwJzwyhOxt4vutaFD0gL8y2q6QiysuNnP daws@macbook-air"
+    # The M2's operations key (~/.ssh/m2-to-mini there): a shell from the M2
+    # only (its tailnet address), for reading this host's services' state and
+    # logs; no agent, port or X11 forwarding.
+    ''from="100.84.74.5",no-agent-forwarding,no-port-forwarding,no-X11-forwarding ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAYpuDkTWZ73lGGCgM0V8JVbvAc+2QAc2+/OZMVjozn8 m2-to-mini@mac-mini-m2''
   ];
 
   # Keep the M2's nightly tinytrader backups here (tinytrader-ops
