@@ -157,6 +157,22 @@
             ./nixos/example.nix
           ];
         };
+
+        # The NAS (a Minisforum N5 Pro): the store's disks and the data
+        # services. Its part in tinytrader, imported unchanged, brings
+        # sops-nix's NixOS module itself (the role decrypts tinytrader-ops'
+        # secrets with this machine's host key), so it isn't listed again.
+        # It is built on tinytrader's NixOS release (tinytrader-ops' nixpkgs,
+        # nixos-26.05, the one its service module is written for), not this
+        # flake's nixos-unstable: a server on a stable release, moving when
+        # tinytrader's pin does.
+        nas = tinytrader-ops.inputs.nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit nix-secrets; };
+          modules = [
+            ./nixos/nas.nix
+            tinytrader-ops.nixosModules.nas
+          ];
+        };
       };
     };
 }

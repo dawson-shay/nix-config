@@ -10,6 +10,7 @@ setup on every machine, nix-darwin for the Macs' machine level, and NixOS
 | Mac mini M4 (`mini`) | `homeConfigurations."dawsonshay@mini"` | `darwinConfigurations.mini` (`darwin/mini.nix`) plus tinytrader-ops' role |
 | Mac mini M2 (`m2`) | `homeConfigurations."daws@mac"` | `darwinConfigurations.m2` (`darwin/m2.nix`) plus tinytrader-ops' role |
 | MacBook Air (`laptop`) | `homeConfigurations."daws@mac"` | `darwinConfigurations.laptop` (`darwin/laptop.nix`) |
+| NAS, Minisforum N5 Pro (`nas`), from 2026-11-15 | none yet | `nixosConfigurations.nas` (`nixos/nas.nix`) plus tinytrader-ops' role |
 
 Day-to-day use (Emacs, Claude Code sessions, notebooks, switching each
 Mac): [docs/guide.md](docs/guide.md).
@@ -37,7 +38,10 @@ Mac): [docs/guide.md](docs/guide.md).
 │   └── ai-proxy.nix   the local AI endpoint, a daemon on mini
 ├── nixos/
 │   ├── common.nix     what every Linux machine's machine config shares (NixOS)
-│   └── example.nix    nixosConfigurations.example: a stub host, so nix flake check evaluates nixos/common.nix
+│   ├── example.nix    nixosConfigurations.example: a stub host, so nix flake check evaluates nixos/common.nix
+│   ├── nas.nix        nixosConfigurations.nas: the NAS's machine config (ZFS, chrony, node_exporter, auto-deploy)
+│   ├── nas-pools.nix  its disks: one ZFS pool per disk (local.nas.pools), the store's volumes on them
+│   └── nas-hardware.nix  its hardware (by label, as installed)
 ├── pkgs/
 │   ├── ai-proxy.nix   the endpoint: CLIProxyAPI in front of OpenRouter (packages.<system>.ai-proxy)
 │   └── cliproxyapi.nix  CLIProxyAPI's release binary, pinned by checksum
@@ -77,9 +81,10 @@ Responsibilities:
 * `darwin/common.nix`: the rest of what every Mac here shares (nix-darwin), the counterpart of `nixos/common.nix`: Determinate Nix, the shells left to Home Manager, Tailscale's resolver file, nix-darwin's tools on PATH.
 * `darwin/server.nix`: what the always-on Macs (the M4, the M2) add: power (never sleeps, restarts after a power cut), the container tools, and Colima, which runs the Docker engine as a boot daemon (`org.nixos.colima`), so containers come back after a reboot without anyone logging in (each Mac sizes its VM with `local.colima`).
 * `darwin/laptop.nix`: the MacBook Air's: a client, with the Tailscale app rather than nix-darwin's, Touch ID for sudo, and the M4's builds accepted (`extra-trusted-users`).
-* `nixos/common.nix`: the rest of what every Linux machine shares (NixOS): Nix with flakes, Docker natively, never sleeping. Only `nixosConfigurations.example` uses it so far; the X200s is still on `/etc/nixos/configuration.nix`.
+* `nixos/common.nix`: the rest of what every Linux machine shares (NixOS): Nix with flakes, Docker natively, never sleeping. `nixosConfigurations.example` and `.nas` use it; the X200s is still on `/etc/nixos/configuration.nix`.
 * `darwin/mini.nix`: the Mac mini M4's: its name, user, SSH keys, Colima's size, and the local AI endpoint (`darwin/ai-proxy.nix`, below), whose secrets sops-nix decrypts.
 * `darwin/m2.nix`: the Mac mini M2's (the NAS and job runner, account `daws`): its name, user, SSH keys and Colima's size. Its user config is `daws@mac`.
+* `nixos/nas.nix`: the NAS's (account `daws`): ZFS (monthly scrubs, daily/weekly/monthly snapshots), chrony, node_exporter, no desktop, its SSH keys, auto-deploy, and tinytrader-ops' `nixosModules.nas` (`tinytrader-deploy.nas.enable`, off until its host key is a recipient of tinytrader-ops' secrets). Its disks are `local.nas.pools` in `nixos/nas-pools.nix`: one pool per disk (two disks make a mirror), each with the store's volumes as datasets mounted at `/srv/store/<volume>`; adding a disk is one entry, and `nas-pools` on the NAS prints the commands that make it. Install and migration: tinytrader-ops' `docs/nas-migration-2026-11-15.md`.
 * `emacs/init.el`: portable Emacs behavior and package configuration.
 
 *hosts/ will likely be refactored into something closer to platforms/{linux/, mac/} and then machine specific like x200s, mac-laptop, rapsberry-pi, etc. Similarly, right now, init.el holds macos specific adjustments. If that grows too much, we'll adjust.
@@ -114,7 +119,9 @@ Mac with another name. Don't use `sudo darwin-rebuild switch`: it
 evaluates as root, which has no GitHub login, so it can't fetch the private
 tinytrader-ops input (nor nix-secrets).
 
-On the X200s, the machine config is `sudo nixos-rebuild switch`.
+On the X200s, the machine config is `sudo nixos-rebuild switch`. On the
+NAS, as you (so the private inputs are fetched with your GitHub login):
+`nixos-rebuild switch --flake ~/repos/nix-config#nas --sudo`.
 
 ## The tinytrader-ops role
 
