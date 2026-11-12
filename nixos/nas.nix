@@ -172,6 +172,25 @@
   # (its sops-nix decrypts them at activation; until then it can't) and the
   # pools are made.
   tinytrader-deploy.nas.enable = false;
+  # The mini's nightly off-host backup lands here (tinytrader-ops'
+  # backup.offHost.mini = "nas"): its key, for rrsync only, write-only,
+  # from the tailnet, into ~daws/Backups/tinytrader-from-mini. Applies once
+  # the role is on.
+  tinytrader-deploy.nas.backupReceive.enable = true;
+
+  # TODO(UPS): a clean shutdown on low battery, through NUT (power.ups).
+  # The UPS model isn't known yet, so this stays off. Once it is connected
+  # (USB), set its driver (`nut-scanner -U` names it; usbhid-ups covers most
+  # APC, CyberPower and Eaton units) and turn it on:
+  #   power.ups = {
+  #     enable = true;
+  #     mode = "standalone";
+  #     ups.ups = { driver = "usbhid-ups"; port = "auto"; };
+  #     users.upsmon = { passwordFile = <a sops secret>; upsmon = "primary"; };
+  #     upsmon.monitor.ups.user = "upsmon";
+  #   };
+  # upsmon shuts the NAS down when the UPS reports low battery. ZFS pools
+  # export cleanly on shutdown, and the store stops first (systemd order).
 
   # Deploy what merges to tinytrader and tinytrader-ops main, every 5 minutes
   # outside market hours, as on the mini (tinytrader-ops decision 0011): it
