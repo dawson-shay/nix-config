@@ -28,11 +28,17 @@
   networking.hostName = "mini";
   networking.localHostName = "mini";
 
-  # Colima's VM: the containers (the trading services, after the cutover).
-  # FileVault is off here, so it starts at boot without anyone logging in.
+  # Colima's VM: research notebooks, development and agent sandboxes only
+  # (option C, tinytrader-ops docs/nas-migration-2026-11-15.md "The service
+  # plan"): the services run natively, as launchd daemons. 6 GB (it was
+  # 12). Until the remaining containers (the gateways, the console,
+  # accounts, relay-iex, the small services) are native, their limits add
+  # up to about 4.3 GB, with Nomad's docker jobs on top: switch this only
+  # once they've moved, or with fewer jobs at once. FileVault is off here,
+  # so it starts at boot without anyone logging in.
   local.colima = {
     cpu = 6;
-    memory = 12;
+    memory = 6;
     disk = 100;
   };
 
@@ -58,4 +64,13 @@
   # ~/.local/share/tinytrader/deploy; decision 0012), so ~/repos is an
   # ordinary working copy.
   tinytrader-ops.autoDeploy.enable = true;
+
+  # Once the M4 is on Ethernet: its monitor warns when the default route
+  # isn't wired, and for 10 minutes after the link flaps (tinytrader-deploy
+  # modules/network-watch-darwin.nix; needs tinytrader-ops at or after its
+  # NAS change). Off while it's on Wi-Fi, where it would warn all the time.
+  # tinytrader-deploy.networkWatch = {
+  #   enable = true;
+  #   interface = "en0"; # networksetup -listallhardwareports
+  # };
 }
