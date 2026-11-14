@@ -71,7 +71,7 @@ users, authorized keys and what it alone runs.
 Responsibilities:
 
 * `/etc/nixos/configuration.nix`: machine/system configuration on the X200s: kernel, bootloader, networking, Xorg, services, hardware.
-* `home.nix`: user configuration shared across machines: CLI tools, Git/GitHub, Emacs and Emacs packages, SSH config, and `cargo` wrapped to build into one folder per repository (`~/.cache/cargo-target/<repo>/target`), shared by its worktrees, so they don't each leave a `target/` behind (tinytrader-deploy's decision 0016).
+* `home.nix`: user configuration shared across machines: CLI tools, Git/GitHub, Emacs and Emacs packages, SSH config, and `cargo` wrapped to share one build folder per repository (`~/.cache/cargo-target/<repo>/target`, cargo's intermediate files) across its worktrees, while each checkout keeps its own binaries in `./target` (tinytrader-deploy's decision 0016).
 * `hosts/x200s.nix`, `hosts/mac.nix`: per-platform user settings.
 * `system/common.nix`: the machine configuration every machine shares, Mac or Linux: system tools, Tailscale, SSH (keys only), sops-nix's key, the timezone.
 * `darwin/common.nix`: the rest of what every Mac here shares (nix-darwin), the counterpart of `nixos/common.nix`: Determinate Nix, the shells left to Home Manager, Tailscale's resolver file, nix-darwin's tools on PATH.
