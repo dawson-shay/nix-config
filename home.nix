@@ -1,19 +1,23 @@
 { config, pkgs, lib, ... }:
 
 let
-  # cargo, building into one target per repository on this machine,
-  # ~/.cache/cargo-target/<repo>/target, <repo> named by the repository's
-  # common Git folder, so every worktree shares its main checkout's
-  # (tinytrader-deploy's scripts/cargo-shim, decision 0016). As the cargo on
-  # PATH it covers every shell, interactive or not, agents' too. A
-  # CARGO_TARGET_DIR already set is kept (the Nomad build jobs set their
-  # own); outside a repository it changes nothing. tinytrader-deploy's
-  # daily disk-hygiene job deletes a target idle for 7 days.
+  # cargo, sharing one build folder per repository on this machine:
+  # CARGO_BUILD_BUILD_DIR (cargo's intermediate files: deps, incremental,
+  # build scripts) is ~/.cache/cargo-target/<repo>/target, <repo> named by
+  # the repository's common Git folder, so every worktree shares its main
+  # checkout's compiled dependencies. Finished binaries stay in each
+  # checkout's own ./target, so two checkouts never overwrite each other's
+  # target/release/<bin> (tinytrader-deploy's scripts/cargo-shim, decision
+  # 0016). As the cargo on PATH it covers every shell, interactive or not,
+  # agents' too. A CARGO_TARGET_DIR or CARGO_BUILD_BUILD_DIR already set is
+  # kept (the Nomad build jobs set their own); outside a repository it
+  # changes nothing. tinytrader-deploy's daily disk-hygiene job deletes a
+  # build folder or target idle for 7 days.
   cargo = pkgs.writeShellScriptBin "cargo" ''
-    if [ -z "''${CARGO_TARGET_DIR:-}" ] && common="$(${pkgs.git}/bin/git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
+    if [ -z "''${CARGO_TARGET_DIR:-}" ] && [ -z "''${CARGO_BUILD_BUILD_DIR:-}" ] && common="$(${pkgs.git}/bin/git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
       repo="''${common%/.git}"
       repo="''${repo##*/}"
-      export CARGO_TARGET_DIR="$HOME/.cache/cargo-target/''${repo%.git}/target"
+      export CARGO_BUILD_BUILD_DIR="$HOME/.cache/cargo-target/''${repo%.git}/target"
     fi
     exec ${pkgs.cargo}/bin/cargo "$@"
   '';
